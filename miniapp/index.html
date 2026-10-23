@@ -21,7 +21,7 @@ label.l{display:block;margin:20px 0 8px;font-size:13px;color:var(--mu)}input[typ
 <section id="links" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Сайт и приложение</h1><p class="mu">Здесь можно познакомиться с проектом и скачать приложение, когда оно будет готово.</p>
 <button class="btn" id="site">Официальный сайт</button><button class="btn g" data-os="Android">Скачать для Android</button><button class="btn g" data-os="iOS">Скачать для iOS</button></section>
 </main><script>
-const SITE_URL="",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
+const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
 const tg=window.Telegram&&Telegram.WebApp,$=i=>document.getElementById(i);let src=null,ints=new Set();
 try{tg&&(tg.ready(),tg.expand(),tg.setHeaderColor&&tg.setHeaderColor('#000000'),tg.setBackgroundColor&&tg.setBackgroundColor('#000000'))}catch(e){}
 INT.forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=()=>{ints.has(k)?ints.delete(k):ints.add(k);b.classList.toggle('on')};$('ints').append(b)});
