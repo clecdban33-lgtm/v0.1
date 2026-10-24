@@ -1,55 +1,115 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><title>ClearBank</title>
+
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>ClearBank</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--tx:#f5f5f7;--mu:#8e8e93;--g:rgba(255,255,255,.06);--b:rgba(255,255,255,.14)}*{box-sizing:border-box}html,body{margin:0;width:100%;overflow-x:hidden}
-body{background:#000 radial-gradient(60% 38% at 50% -4%,rgba(255,255,255,.12),transparent 70%) no-repeat;color:var(--tx);font:16px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding:max(20px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom))}
-main{max-width:480px;margin:0 auto;animation:in .3s ease}@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-h1{font-size:28px;letter-spacing:-.8px;margin:6px 0 6px}.brand{font-weight:800;letter-spacing:-.5px;font-size:20px}.brand span{opacity:.55}.mu{color:var(--mu);font-size:14px}.hidden{display:none!important}
-label.l{display:block;margin:20px 0 8px;font-size:13px;color:var(--mu)}input[type=text],textarea{width:100%;font:inherit;color:var(--tx);background:var(--g);border:1px solid var(--b);border-radius:14px;padding:14px;backdrop-filter:blur(20px)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}.chip,.opt{background:var(--g);border:1px solid var(--b);color:var(--tx);border-radius:999px;padding:10px 14px;font:inherit;cursor:pointer;transition:.15s}.chip.on{background:#fff;color:#000}.chip:active,.opt:active,.btn:active{transform:scale(.97)}
-.opt{display:flex;width:100%;border-radius:16px;margin:7px 0;text-align:left;align-items:center;gap:10px}.opt i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--mu);flex:none}.opt.on{border-color:#fff;box-shadow:0 0 18px rgba(255,255,255,.18)}.opt.on i{background:#fff;border-color:#fff}
-.btn{display:block;width:100%;border:0;border-radius:16px;padding:16px;font:inherit;font-weight:700;background:#fff;color:#000;margin:14px 0;cursor:pointer;box-shadow:0 0 26px rgba(255,255,255,.2);transition:.15s}.btn.g{background:var(--g);color:var(--tx);border:1px solid var(--b);box-shadow:none}.btn[disabled]{opacity:.45}
-.ck{display:flex;gap:10px;align-items:flex-start;margin:18px 0;font-size:13px;color:var(--mu)}.ck input{margin-top:3px;width:18px;height:18px}.err{color:#ff667b;font-size:13px;min-height:18px}
-</style></head><body><main>
-<section id="load"><div class="brand">Clear<span>Bank</span></div><p class="mu">Загрузка…</p></section>
-<section id="fatal" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Не получилось</h1><p class="mu" id="fmsg"></p><button class="btn" id="retry">Повторить</button></section>
-<section id="done" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Анкета успешно отправлена!</h1><p class="mu">Открываем раздел с приложением…</p></section>
-<section id="form" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Анкета</h1><p class="mu">Три коротких вопроса, чтобы следить за развитием проекта. ClearBank пока прототип, а не банк.</p>
-<label class="l" for="name">Как к вам обращаться?</label><input id="name" type="text" maxlength="40" placeholder="Имя" autocomplete="given-name">
-<label class="l">Что вам интересно? (необязательно)</label><div class="chips" id="ints"></div>
-<label class="l">Откуда вы узнали о ClearBank?</label><div id="srcs"></div>
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#f5f5f7;font:16px/1.45 -apple-system,"Segoe UI",Arial,sans-serif;padding:24px 18px}
+main{max-width:480px;margin:auto}
+.brand{font-size:20px;font-weight:800}.brand span{opacity:.55}
+h1{font-size:28px;letter-spacing:-.8px;margin:16px 0 8px}
+.mu{color:#999;font-size:14px}.hidden{display:none!important}
+label{display:block;margin:20px 0 8px;font-size:13px;color:#999}
+input[type=text],textarea{width:100%;font:inherit;color:#fff;background:#171717;border:1px solid #383838;border-radius:14px;padding:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip,.opt{background:#171717;border:1px solid #383838;color:#fff;border-radius:999px;padding:10px 14px;font:inherit;cursor:pointer}
+.chip.on{background:#fff;color:#000}
+.opt{display:block;width:100%;border-radius:14px;margin:7px 0;text-align:left}
+.opt.on{border-color:#fff;background:#292929}
+.btn{display:block;width:100%;border:0;border-radius:15px;padding:16px;font:inherit;font-weight:700;background:#fff;color:#000;margin:14px 0;cursor:pointer}
+.btn.g{background:#171717;color:#fff;border:1px solid #383838}
+.ck{display:flex;gap:10px;align-items:flex-start;margin:18px 0;font-size:13px;color:#999}
+.ck input{margin-top:3px;width:18px;height:18px}
+.err{color:#ff667b;font-size:13px;min-height:18px}
+</style>
+</head>
+<body>
+<main>
+<section id="form">
+<div class="brand">Clear<span>Bank</span></div>
+<h1>Анкета</h1>
+<p class="mu">Расскажите, что вам интересно в проекте ClearBank. Это демонстрационная анкета: ответы не сохраняются и не отправляются.</p>
+
+<label for="name">Как к вам обращаться?</label>
+<input id="name" type="text" maxlength="40" placeholder="Имя" autocomplete="given-name">
+
+<label>Что вам интересно? (необязательно)</label>
+<div class="chips" id="ints"></div>
+
+<label>Откуда вы узнали о ClearBank?</label>
+<div id="srcs"></div>
 <textarea id="other" class="hidden" rows="3" maxlength="200" placeholder="Напишите свой ответ"></textarea>
-<label class="ck"><input id="consent" type="checkbox"><span>Согласен(на) на обработку имени, Telegram-аккаунта и ответов анкеты для связи по проекту ClearBank. Ответы можно удалить командой /delete в боте.</span></label>
-<div class="err" id="err"></div><button class="btn" id="send">Отправить анкету</button></section>
-<section id="links" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Сайт и приложение</h1><p class="mu">Здесь можно познакомиться с проектом и скачать приложение, когда оно будет готово.</p>
-<button class="btn" id="site">Открыть ClearBank</button><button class="btn g" id="apk">Скачать Android-приложение</button><button class="btn g" id="ios">iOS — в разработке</button></section>
-</main><script>
-const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/",APK_URL="https://clecdban33-lgtm.github.io/v0.1/downloads/ClearBank.apk",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
-const tg=window.Telegram&&Telegram.WebApp,$=i=>document.getElementById(i);let src=null,ints=new Set(),retryFn=null;
-const INIT=(tg&&tg.initData)||'';
-const API=(()=>{try{const u=new URL(new URLSearchParams(location.search).get('api')||'');return u.protocol==='https:'?u.origin:''}catch(e){return ''}})();
-const show=id=>['load','fatal','done','form','links'].forEach(s=>$(s).classList.toggle('hidden',s!==id));
-const fatal=(m,fn)=>{$('fmsg').textContent=m;retryFn=fn||null;$('retry').classList.toggle('hidden',!fn);show('fatal')};
-const fail=m=>{const b=$('send');b.disabled=false;b.textContent='Отправить анкету';$('err').textContent=m||'Не удалось отправить анкету. Проверьте соединение и нажмите «Отправить» ещё раз.'};
-const AUTH='Сессия устарела. Закройте окно и откройте анкету заново через /start.';
-async function call(path,body){const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},body:JSON.stringify({initData:INIT,...body})});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||'http');return j}
-try{tg&&(tg.ready(),tg.expand(),tg.setHeaderColor&&tg.setHeaderColor('#000000'),tg.setBackgroundColor&&tg.setBackgroundColor('#000000'))}catch(e){}
-INT.forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=()=>{ints.has(k)?ints.delete(k):ints.add(k);b.classList.toggle('on')};$('ints').append(b)});
-SRC.forEach(([k,t])=>{const b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML='<i></i>'+t;b.onclick=()=>{src=k;document.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('other').classList.toggle('hidden',k!=='other');k==='other'&&$('other').focus()};$('srcs').append(b)});
-const note=m=>tg&&tg.showAlert?tg.showAlert(m):alert(m);
-$('send').onclick=async()=>{const name=$('name').value.trim(),o=$('other').value.trim();let e='';
-if(!name)e='Введите имя.';else if(!src)e='Выберите, откуда вы узнали о ClearBank.';else if(src==='other'&&!o)e='Напишите свой ответ.';else if(!$('consent').checked)e='Нужно согласие на обработку данных.';
-$('err').textContent=e;if(e)return;const d={name,interests:[...ints],source:src,source_text:src==='other'?o:'',consent:true};
-if(!INIT||!API){$('err').textContent='Откройте анкету кнопкой в чате с ботом ClearBank (команда /start).';return}
-const b=$('send');b.disabled=true;b.textContent='Отправляем…';$('err').textContent='';
-try{const j=await call('/api/anketa',{form:d});if(j.status==='saved'){show('done');setTimeout(()=>show('links'),1400)}else if(j.status==='exists')show('links');else throw new Error('x')}
-catch(x){fail(x.message==='auth'?AUTH:null)}};
-$('retry').onclick=()=>retryFn&&retryFn();
-const go_=u=>tg&&tg.openLink?tg.openLink(u):window.open(u,'_blank');
-$('site').onclick=()=>go_(SITE_URL);$('apk').onclick=()=>go_(APK_URL);$('ios').onclick=()=>note('Приложение для iOS пока разрабатывается.');
-async function init(){if(new URLSearchParams(location.search).get('screen')==='links')return show('links');
-if(!INIT)return fatal('Откройте анкету через Telegram-бота ClearBank: отправьте боту /start.');
-if(!API)return fatal('Откройте анкету кнопкой «Пройти анкету» в чате с ботом: отправьте боту /start.');
-show('load');try{const j=await call('/api/status',{});show(j.submitted?'links':'form')}catch(x){x.message==='auth'?fatal(AUTH):fatal('Не удалось связаться с сервером. Проверьте соединение и повторите.',init)}}
-init();
-</script></body></html>
+
+<label class="ck">
+<input id="consent" type="checkbox">
+<span>Я понимаю, что это демонстрационная форма и мои ответы не сохраняются и не отправляются.</span>
+</label>
+
+<div class="err" id="err"></div>
+<button class="btn" id="send">Завершить анкету</button>
+</section>
+
+<section id="done" class="hidden">
+<div class="brand">Clear<span>Bank</span></div>
+<h1>Готово!</h1>
+<p class="mu">Спасибо за интерес к ClearBank. Анкета демонстрационная, ответы не отправлены. Можете перейти на сайт проекта или попробовать скачать Android-приложение.</p>
+<button class="btn" id="site">Открыть ClearBank</button>
+<button class="btn g" id="apk">Скачать Android-приложение</button>
+<button class="btn g" id="ios">iOS — в разработке</button>
+</section>
+</main>
+<script>
+const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/";
+const APK_URL="https://clecdban33-lgtm.github.io/v0.1/downloads/ClearBank.apk";
+const INT=["Переводы","Мультивалютность","Аналитика","ИИ-помощник","Оплата по QR"];
+const SRC=["От друга","Из пабликов","У блогеров","Свой ответ"];
+const $=id=>document.getElementById(id);
+const tg=window.Telegram&&window.Telegram.WebApp;
+let source="",interests=new Set();
+
+try{if(tg){tg.ready();tg.expand();tg.setHeaderColor("#000000");tg.setBackgroundColor("#000000")}}catch(e){}
+
+INT.forEach((name,i)=>{
+ const b=document.createElement("button");
+ b.type="button";b.className="chip";b.textContent=name;
+ b.onclick=()=>{interests.has(i)?interests.delete(i):interests.add(i);b.classList.toggle("on")};
+ $("ints").appendChild(b);
+});
+
+SRC.forEach((name,i)=>{
+ const b=document.createElement("button");
+ b.type="button";b.className="opt";b.textContent=name;
+ b.onclick=()=>{
+  source=String(i);
+  document.querySelectorAll(".opt").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  $("other").classList.toggle("hidden",i!==3);
+ };
+ $("srcs").appendChild(b);
+});
+
+$("send").onclick=()=>{
+ const name=$("name").value.trim();
+ if(!name){$("err").textContent="Введите имя.";return}
+ if(!source){$("err").textContent="Выберите вариант ответа.";return}
+ if(source==="3"&&!$("other").value.trim()){$("err").textContent="Напишите свой ответ.";return}
+ if(!$("consent").checked){$("err").textContent="Подтвердите, что понимаете условия демонстрационной формы.";return}
+ $("form").classList.add("hidden");
+ $("done").classList.remove("hidden");
+};
+
+function openLink(url){
+ if(tg&&tg.openLink){tg.openLink(url)}
+ else{window.open(url,"_blank","noopener")}
+}
+$("site").onclick=()=>openLink(SITE_URL);
+$("apk").onclick=()=>openLink(APK_URL);
+$("ios").onclick=()=>{if(tg&&tg.showAlert)tg.showAlert("Приложение для iOS пока разрабатывается.");else alert("Приложение для iOS пока разрабатывается.")};
+</script>
+</body>
+</html>
