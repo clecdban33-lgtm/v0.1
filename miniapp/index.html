@@ -19,9 +19,9 @@ label.l{display:block;margin:20px 0 8px;font-size:13px;color:var(--mu)}input[typ
 <label class="ck"><input id="consent" type="checkbox"><span>Согласен(на) на обработку имени, Telegram-аккаунта и ответов анкеты для связи по проекту ClearBank. Ответы можно удалить командой /delete в боте.</span></label>
 <div class="err" id="err"></div><button class="btn" id="send">Отправить анкету</button></section>
 <section id="links" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Сайт и приложение</h1><p class="mu">Здесь можно познакомиться с проектом и скачать приложение, когда оно будет готово.</p>
-<button class="btn" id="site">Официальный сайт</button><button class="btn g" data-os="Android">Скачать для Android</button><button class="btn g" data-os="iOS">Скачать для iOS</button></section>
+<button class="btn" id="site">Открыть ClearBank</button><button class="btn g" id="apk">Скачать Android-приложение</button><button class="btn g" id="ios">iOS — в разработке</button></section>
 </main><script>
-const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
+const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/",APK_URL="https://clecdban33-lgtm.github.io/v0.1/downloads/ClearBank.apk",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
 const tg=window.Telegram&&Telegram.WebApp,$=i=>document.getElementById(i);let src=null,ints=new Set();
 try{tg&&(tg.ready(),tg.expand(),tg.setHeaderColor&&tg.setHeaderColor('#000000'),tg.setBackgroundColor&&tg.setBackgroundColor('#000000'))}catch(e){}
 INT.forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=()=>{ints.has(k)?ints.delete(k):ints.add(k);b.classList.toggle('on')};$('ints').append(b)});
@@ -31,7 +31,7 @@ $('send').onclick=()=>{const name=$('name').value.trim(),o=$('other').value.trim
 if(!name)e='Введите имя.';else if(!src)e='Выберите, откуда вы узнали о ClearBank.';else if(src==='other'&&!o)e='Напишите свой ответ.';else if(!$('consent').checked)e='Нужно согласие на обработку данных.';
 $('err').textContent=e;if(e)return;const d={name,interests:[...ints],source:src,source_text:src==='other'?o:'',consent:true};
 if(tg&&tg.initData){tg.sendData(JSON.stringify(d))}else{$('err').textContent='Тестовый режим (вне Telegram): '+JSON.stringify(d)}};
-$('site').onclick=()=>{if(!SITE_URL)return note('Сайт скоро появится.');tg&&tg.openLink?tg.openLink(SITE_URL):window.open(SITE_URL)};
-document.querySelectorAll('[data-os]').forEach(b=>b.onclick=()=>note('Версия для '+b.dataset.os+' пока в работе. Мы сообщим о запуске.'));
+const go_=u=>tg&&tg.openLink?tg.openLink(u):window.open(u,'_blank');
+$('site').onclick=()=>go_(SITE_URL);$('apk').onclick=()=>go_(APK_URL);$('ios').onclick=()=>note('Приложение для iOS пока разрабатывается.');
 if(new URLSearchParams(location.search).get('screen')==='links'){$('form').classList.add('hidden');$('links').classList.remove('hidden')}
 </script></body></html>
