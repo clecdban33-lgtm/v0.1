@@ -11,7 +11,10 @@ label.l{display:block;margin:20px 0 8px;font-size:13px;color:var(--mu)}input[typ
 .btn{display:block;width:100%;border:0;border-radius:16px;padding:16px;font:inherit;font-weight:700;background:#fff;color:#000;margin:14px 0;cursor:pointer;box-shadow:0 0 26px rgba(255,255,255,.2);transition:.15s}.btn.g{background:var(--g);color:var(--tx);border:1px solid var(--b);box-shadow:none}.btn[disabled]{opacity:.45}
 .ck{display:flex;gap:10px;align-items:flex-start;margin:18px 0;font-size:13px;color:var(--mu)}.ck input{margin-top:3px;width:18px;height:18px}.err{color:#ff667b;font-size:13px;min-height:18px}
 </style></head><body><main>
-<section id="form"><div class="brand">Clear<span>Bank</span></div><h1>Анкета</h1><p class="mu">Три коротких вопроса, чтобы следить за развитием проекта. ClearBank пока прототип, а не банк.</p>
+<section id="load"><div class="brand">Clear<span>Bank</span></div><p class="mu">Загрузка…</p></section>
+<section id="fatal" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Не получилось</h1><p class="mu" id="fmsg"></p><button class="btn" id="retry">Повторить</button></section>
+<section id="done" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Анкета успешно отправлена!</h1><p class="mu">Открываем раздел с приложением…</p></section>
+<section id="form" class="hidden"><div class="brand">Clear<span>Bank</span></div><h1>Анкета</h1><p class="mu">Три коротких вопроса, чтобы следить за развитием проекта. ClearBank пока прототип, а не банк.</p>
 <label class="l" for="name">Как к вам обращаться?</label><input id="name" type="text" maxlength="40" placeholder="Имя" autocomplete="given-name">
 <label class="l">Что вам интересно? (необязательно)</label><div class="chips" id="ints"></div>
 <label class="l">Откуда вы узнали о ClearBank?</label><div id="srcs"></div>
@@ -22,21 +25,31 @@ label.l{display:block;margin:20px 0 8px;font-size:13px;color:var(--mu)}input[typ
 <button class="btn" id="site">Открыть ClearBank</button><button class="btn g" id="apk">Скачать Android-приложение</button><button class="btn g" id="ios">iOS — в разработке</button></section>
 </main><script>
 const SITE_URL="https://clecdban33-lgtm.github.io/v0.1/",APK_URL="https://clecdban33-lgtm.github.io/v0.1/downloads/ClearBank.apk",SRC=[["friend","От друга"],["public","Из пабликов"],["blogger","У блогеров"],["other","Свой ответ"]],INT=[["transfers","Переводы"],["multicurrency","Мультивалютность"],["analytics","Аналитика"],["assistant","ИИ-помощник"],["qr","Оплата по QR"]];
-const tg=window.Telegram&&Telegram.WebApp,$=i=>document.getElementById(i);let src=null,ints=new Set();
-const inTg=!!(tg&&tg.sendData&&tg.platform&&tg.platform!=='unknown');
-const fail=()=>{const b=$('send');b.disabled=false;b.textContent='Отправить анкету';$('err').textContent='Не удалось отправить анкету. Проверьте соединение и нажмите «Отправить» ещё раз.'};
+const tg=window.Telegram&&Telegram.WebApp,$=i=>document.getElementById(i);let src=null,ints=new Set(),retryFn=null;
+const INIT=(tg&&tg.initData)||'';
+const API=(()=>{try{const u=new URL(new URLSearchParams(location.search).get('api')||'');return u.protocol==='https:'?u.origin:''}catch(e){return ''}})();
+const show=id=>['load','fatal','done','form','links'].forEach(s=>$(s).classList.toggle('hidden',s!==id));
+const fatal=(m,fn)=>{$('fmsg').textContent=m;retryFn=fn||null;$('retry').classList.toggle('hidden',!fn);show('fatal')};
+const fail=m=>{const b=$('send');b.disabled=false;b.textContent='Отправить анкету';$('err').textContent=m||'Не удалось отправить анкету. Проверьте соединение и нажмите «Отправить» ещё раз.'};
+const AUTH='Сессия устарела. Закройте окно и откройте анкету заново через /start.';
+async function call(path,body){const r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json','ngrok-skip-browser-warning':'1'},body:JSON.stringify({initData:INIT,...body})});let j={};try{j=await r.json()}catch(e){}if(!r.ok)throw new Error(j.error||'http');return j}
 try{tg&&(tg.ready(),tg.expand(),tg.setHeaderColor&&tg.setHeaderColor('#000000'),tg.setBackgroundColor&&tg.setBackgroundColor('#000000'))}catch(e){}
 INT.forEach(([k,t])=>{const b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=()=>{ints.has(k)?ints.delete(k):ints.add(k);b.classList.toggle('on')};$('ints').append(b)});
 SRC.forEach(([k,t])=>{const b=document.createElement('button');b.className='opt';b.type='button';b.innerHTML='<i></i>'+t;b.onclick=()=>{src=k;document.querySelectorAll('.opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('other').classList.toggle('hidden',k!=='other');k==='other'&&$('other').focus()};$('srcs').append(b)});
 const note=m=>tg&&tg.showAlert?tg.showAlert(m):alert(m);
-$('send').onclick=()=>{const name=$('name').value.trim(),o=$('other').value.trim();let e='';
+$('send').onclick=async()=>{const name=$('name').value.trim(),o=$('other').value.trim();let e='';
 if(!name)e='Введите имя.';else if(!src)e='Выберите, откуда вы узнали о ClearBank.';else if(src==='other'&&!o)e='Напишите свой ответ.';else if(!$('consent').checked)e='Нужно согласие на обработку данных.';
 $('err').textContent=e;if(e)return;const d={name,interests:[...ints],source:src,source_text:src==='other'?o:'',consent:true};
-if(!inTg){$('err').textContent='Чтобы отправить анкету, откройте её через Telegram-бота ClearBank.';return}
-const btn=$('send');btn.disabled=true;btn.textContent='Отправляем…';
-try{tg.sendData(JSON.stringify(d))}catch(x){fail();return}
-setTimeout(fail,4000)};
+if(!INIT||!API){$('err').textContent='Откройте анкету кнопкой в чате с ботом ClearBank (команда /start).';return}
+const b=$('send');b.disabled=true;b.textContent='Отправляем…';$('err').textContent='';
+try{const j=await call('/api/anketa',{form:d});if(j.status==='saved'){show('done');setTimeout(()=>show('links'),1400)}else if(j.status==='exists')show('links');else throw new Error('x')}
+catch(x){fail(x.message==='auth'?AUTH:null)}};
+$('retry').onclick=()=>retryFn&&retryFn();
 const go_=u=>tg&&tg.openLink?tg.openLink(u):window.open(u,'_blank');
 $('site').onclick=()=>go_(SITE_URL);$('apk').onclick=()=>go_(APK_URL);$('ios').onclick=()=>note('Приложение для iOS пока разрабатывается.');
-if(new URLSearchParams(location.search).get('screen')==='links'){$('form').classList.add('hidden');$('links').classList.remove('hidden')}
+async function init(){if(new URLSearchParams(location.search).get('screen')==='links')return show('links');
+if(!INIT)return fatal('Откройте анкету через Telegram-бота ClearBank: отправьте боту /start.');
+if(!API)return fatal('Откройте анкету кнопкой «Пройти анкету» в чате с ботом: отправьте боту /start.');
+show('load');try{const j=await call('/api/status',{});show(j.submitted?'links':'form')}catch(x){x.message==='auth'?fatal(AUTH):fatal('Не удалось связаться с сервером. Проверьте соединение и повторите.',init)}}
+init();
 </script></body></html>
